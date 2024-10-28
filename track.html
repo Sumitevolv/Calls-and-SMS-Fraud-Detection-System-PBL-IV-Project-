@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Check & Location Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #fff0f0;
+            background-image: url(l.jpg);
+        }
+        h1 {
+            color: #1c8dff;
+        }
+        form {
+            background: rgba(7, 197, 255, 0.792);
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #0974ca;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result, #location {
+            margin-top: 20px;
+            padding: 15px;
+            background:rgba(7, 197, 255, 0.792);
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Check if a Call is Fraudulent and Get Caller Location</h1>
+    <form id="numberForm">
+        <label>Enter Caller Phone Number:</label>
+        <input type="text" id="phoneNumber" placeholder="Phone number" required>
+        <button type="submit">Check Number & Get Location</button>
+    </form>
+
+    <h3>Results:</h3>
+    <div id="result"></div>
+    <div id="location"></div>
+
+    <script>
+        document.getElementById('numberForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const phoneNumber = document.getElementById('phoneNumber').value;
+
+            // Fetch data for phone number spam check
+            fetch('/check-number', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: phoneNumber })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerText = 'Error fetching data.';
+            });
+
+            // Get user's current location (if allowed)
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    document.getElementById('location').innerText = `Location: Latitude: ${latitude}, Longitude: ${longitude}`;
+                }, () => {
+                    document.getElementById('location').innerText = 'Unable to access location.';
+                });
+            } else {
+                document.getElementById('location').innerText = 'Geolocation is not supported by this browser.';
+            }
+        });
+    </script>
+</body>
+</html>
